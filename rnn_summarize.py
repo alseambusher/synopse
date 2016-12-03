@@ -73,14 +73,15 @@ def train():
         train_buckets_scale = []
         for i in range(len(train_bucket_sizes)):
                 train_bucket_sizes.append(sum(train_bucket_sizes[:i + 1]) / train_total_size)
-                
+
         #training.
         step_time, loss = 0.0, 0.0
         current_step = 0
         previous_losses = []
         while True:
+            split = np.random.random_sample()
             bucket_id = min([i for i in range(len(train_buckets_scale))
-                                             if train_buckets_scale[i] > np.random.random_sample()])
+                                             if train_buckets_scale[i] > split])
 
             start_time = time.time()
             encoder_inputs, decoder_inputs, target_weights = model.get_batch(
@@ -104,7 +105,7 @@ def train():
                 step_time, loss = 0.0, 0.0
                 for bucket_id in range(len(buckets)):
                     if len(dev_set[bucket_id]) == 0:
-                        print("    eval: empty bucket %d" % (bucket_id))
+                        print("eval: empty bucket %d" % (bucket_id))
                         continue
                     encoder_inputs, decoder_inputs, target_weights = model.get_batch(
                             dev_set, bucket_id)
@@ -112,7 +113,7 @@ def train():
                                                                              target_weights, bucket_id, True)
                     eval_ppx = math.exp(float(eval_loss)) if eval_loss < 200 else float(
                             "inf")
-                    print("    eval: bucket %d perplexity %.2f" % (bucket_id, eval_ppx))
+                    print("eval: bucket %d perplexity %.2f" % (bucket_id, eval_ppx))
                 sys.stdout.flush()
 
 
